@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap 4 Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+<div class="container mt-4">
+  <h1>Poshmark Elections</h1>
+  <form onsubmit="newTransaction()">
+      <div class="form-group">
+        <label for="voteOptions">Whom do you Vote For?</label>
+        <select class="form-control" id="voteOptions">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Vote</button>
+  </form>
+</div>
+<script>
+function newTransaction() {
+    event.preventDefault();
+    $.ajax({
+    type : 'POST',
+    url: 'transactions/new',
+    contentType: 'application/json;charset=UTF-8',
+    data: JSON.stringify({ "candidate": $("#voteOptions option:selected" ).text() })
+   })
+}
+</script>
+</body>
+
+</html>
