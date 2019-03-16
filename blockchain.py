@@ -33,7 +33,6 @@ class Blockchain:
         else:
             raise ValueError('Invalid URL')
 
-
     def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
@@ -237,8 +236,8 @@ def new_transaction():
             vote_exists = True
             break
 
-    if vote_exists == True:
-        response = {'message': 'Your vote has been casted!'}
+    if vote_exists:
+        response = {'message': 'Your vote has been casted already!'}
         return jsonify(response), 200
     else:
         values = request.get_json()
