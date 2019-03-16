@@ -10,12 +10,12 @@ from flask import Flask, jsonify, request, render_template
 
 class Blockchain:
     def __init__(self):
-        self.current_transactions = []
+        self.current_transactions = None
         self.chain = []
         self.nodes = set()
 
         # Create the genesis block
-        self.new_block(previous_hash='1', proof=100)
+        self.new_block(previous_hash='1', proof=100, identifier="genesis")
 
     def register_node(self, address):
         """
@@ -98,7 +98,7 @@ class Blockchain:
 
         return False
 
-    def new_block(self, proof, previous_hash):
+    def new_block(self, proof, previous_hash, identifier=None):
         """
         Create a new Block in the Blockchain
 
@@ -106,17 +106,17 @@ class Blockchain:
         :param previous_hash: Hash of previous Block
         :return: New Block
         """
-
+        node = identifier or node_identifier
         block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
-            'transactions': self.current_transactions,
+            node: self.current_transactions,
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
         # Reset the current list of transactions
-        self.current_transactions = []
+        self.current_transactions = None
 
         self.chain.append(block)
         return block
@@ -130,10 +130,12 @@ class Blockchain:
         :param amount: Amount
         :return: The index of the Block that will hold this transaction
         """
-        self.current_transactions.append({
-            'candidate': candidate,
-            'voter': node_identifier
-        })
+        # self.current_transactions.append({
+        #     'candidate': candidate,
+        #     'voter': node_identifier
+        # })
+
+        self.current_transactions = candidate
 
         return self.last_block['index'] + 1
 
@@ -202,42 +204,55 @@ blockchain = Blockchain()
 
 @app.route('/mine', methods=['GET'])
 def mine():
-    # We run the proof of work algorithm to get the next proof...
-    last_block = blockchain.last_block
-    proof = blockchain.proof_of_work(last_block)
+    if blockchain.current_transactions is not None:
+        # We run the proof of work algorithm to get the next proof...
+        last_block = blockchain.last_block
+        proof = blockchain.proof_of_work(last_block)
 
-    # # We must receive a reward for finding the proof.
-    # # The sender is "0" to signify that this node has mined a new coin.
-    # blockchain.new_transaction(candidate="1")
+        # # We must receive a reward for finding the proof.
+        # # The sender is "0" to signify that this node has mined a new coin.
+        # blockchain.new_transaction(candidate="1")
 
-    # Forge the new Block by adding it to the chain
-    previous_hash = blockchain.hash(last_block)
-    block = blockchain.new_block(proof, previous_hash)
+        # Forge the new Block by adding it to the chain
+        previous_hash = blockchain.hash(last_block)
+        block = blockchain.new_block(proof, previous_hash)
 
-    response = {
-        'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
-    }
-    return jsonify(response), 200
+        response = {
+            'message': "New Block Forged",
+            'index': block['index'],
+            node_identifier: block[node_identifier],
+            'previous_hash': block['previous_hash'],
+        }
+        return jsonify(response), 200
+    else:
+        return jsonify({'message': "No votes to mine"}), 200
 
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
-    values = request.get_json()
+    vote_exists = False
 
-    # Check that the required fields are in the POST'ed data
-    required = ['candidate']
-    if not all(k in values for k in required):
-        return 'Missing values', 400
+    for i, val in enumerate(blockchain.chain):
+        if node_identifier in val:
+            vote_exists = True
+            break
 
-    # Create a new Transaction
-    index = blockchain.new_transaction(values['candidate'])
+    if vote_exists == True:
+        response = {'message': 'Your vote has been casted!'}
+        return jsonify(response), 200
+    else:
+        values = request.get_json()
 
-    response = {'message': f'Transaction will be added to Block {index}'}
-    return jsonify(response), 201
+        # Check that the required fields are in the POST'ed data
+        required = ['candidate']
+        if not all(k in values for k in required):
+            return 'Missing values', 400
+
+        # Create a new Transaction
+        index = blockchain.new_transaction(values['candidate'])
+
+        response = {'message': f'Transaction will be added to Block {index}'}
+        return jsonify(response), 201
 
 
 @app.route('/chain', methods=['GET'])

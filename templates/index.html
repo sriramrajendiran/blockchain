@@ -28,15 +28,20 @@
       <button type="submit" class="btn btn-primary">Vote</button>
   </form>
 </div>
+<div class="container mt-4" id="response">
+</div>
 <script>
 function newTransaction() {
     event.preventDefault();
-    $.ajax({
-    type : 'POST',
-    url: 'transactions/new',
-    contentType: 'application/json;charset=UTF-8',
-    data: JSON.stringify({ "candidate": $("#voteOptions option:selected" ).text() })
-   })
+    res = $.ajax({
+      type : 'POST',
+      url: 'transactions/new',
+      contentType: 'application/json;charset=UTF-8',
+      data: JSON.stringify({ "candidate": $("#voteOptions option:selected" ).text() }),
+      success: function(data) {
+                $("#response").text(JSON.stringify(data));
+            }
+    })
 }
 </script>
 </body>
