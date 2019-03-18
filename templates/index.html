@@ -56,7 +56,7 @@ function register() {
       type : 'POST',
       url: 'nodes/register',
       contentType: 'application/json;charset=UTF-8',
-      data: JSON.stringify({ "nodes": $("#ip" ).val() }),
+      data: JSON.stringify({ "nodes": [$("#ip").val()] }),
       success: function(data) {
                 $("#response").text(JSON.stringify(data));
             }
