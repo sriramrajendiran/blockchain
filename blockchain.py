@@ -33,7 +33,6 @@ class Blockchain:
         else:
             raise ValueError('Invalid URL')
 
-
     def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
@@ -137,6 +136,7 @@ class Blockchain:
 
         self.current_transactions = candidate
 
+        print("last block ", self.last_block['index'])
         return self.last_block['index'] + 1
 
     @property
@@ -156,12 +156,13 @@ class Blockchain:
         return hashlib.sha256(block_string).hexdigest()
 
     def proof_of_work(self, last_block):
+
         """
         Simple Proof of Work Algorithm:
 
          - Find a number p' such that hash(pp') contains leading 4 zeroes
          - Where p is the previous proof, and p' is the new proof
-         
+
         :param last_block: <dict> last Block
         :return: <int>
         """
@@ -248,6 +249,9 @@ def new_transaction():
         if not all(k in values for k in required):
             return 'Missing values', 400
 
+        print("test........", values)
+        print("test........", values['candidate'])
+
         # Create a new Transaction
         index = blockchain.new_transaction(values['candidate'])
 
@@ -267,6 +271,7 @@ def full_chain():
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
     values = request.get_json()
+    print("register data", values)
 
     nodes = values.get('nodes')
     if nodes is None:
@@ -276,8 +281,7 @@ def register_nodes():
         blockchain.register_node(node)
 
     response = {
-        'message': 'New nodes have been added',
-        'total_nodes': list(blockchain.nodes),
+        'message': 'New node have been added'
     }
     return jsonify(response), 201
 
