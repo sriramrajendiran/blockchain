@@ -216,6 +216,9 @@ def mine():
 
         # Forge the new Block by adding it to the chain
         previous_hash = blockchain.hash(last_block)
+
+        replaced = blockchain.resolve_conflicts()
+
         block = blockchain.new_block(proof, previous_hash)
 
         response = {
