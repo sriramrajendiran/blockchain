@@ -33,8 +33,13 @@
       </div>
       <button type="submit" class="btn btn-primary">Vote</button>
   </form>
+  <div class="container mt-4">
+    <button class="btn btn-primary" onclick="get_votes()">Get Votes</button>
+  </div>
+  <div class="container mt-4" id="votes">
 </div>
 <div class="container mt-4" id="response">
+</div>
 </div>
 <script>
 function newTransaction() {
@@ -59,6 +64,18 @@ function register() {
       data: JSON.stringify({ "nodes": [$("#ip").val()] }),
       success: function(data) {
                 $("#response").text(JSON.stringify(data));
+            }
+    })
+}
+
+function get_votes() {
+    event.preventDefault();
+    res = $.ajax({
+      type : 'GET',
+      url: 'get_votes',
+      contentType: 'application/json;charset=UTF-8',
+      success: function(data) {
+                $("#votes").text(JSON.stringify(data));
             }
     })
 }

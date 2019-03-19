@@ -110,6 +110,7 @@ class Blockchain:
             'index': len(self.chain) + 1,
             'timestamp': time(),
             node: self.current_transactions,
+            'vote': self.current_transactions,
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
@@ -203,6 +204,16 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
+@app.route('/get_votes', methods=['GET'])
+def get_votes():
+    import operator
+    votes = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0}
+    for i, val in enumerate(sorted(blockchain.chain, key=lambda x:x['index']), start=1):
+        if val['vote']:
+            votes[val['vote']] += 1
+    return jsonify(votes), 200
+
+
 @app.route('/mine', methods=['GET'])
 def mine():
     if blockchain.current_transactions is not None:
@@ -225,6 +236,7 @@ def mine():
             'message': "New Block Forged",
             'index': block['index'],
             node_identifier: block[node_identifier],
+            'vote': block[node_identifier],
             'previous_hash': block['previous_hash'],
         }
         return jsonify(response), 200
